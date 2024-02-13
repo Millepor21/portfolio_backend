@@ -1,0 +1,4 @@
+.env
+portfollio/
+__pycache__/
+migrations/

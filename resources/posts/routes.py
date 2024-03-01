@@ -22,7 +22,7 @@ class PostList(MethodView):
         author_id = get_jwt_identity()
         author = AccountModel.query.get(author_id)
         if author:
-            post = PostModel(**post_data, author_id=author_id)
+            post = PostModel(**post_data, author_id=author_id, author=author)
             try:
                 post.save()
                 return post
@@ -30,4 +30,22 @@ class PostList(MethodView):
                 abort(400, message='Please create an account')
         abort(400, message='Create an account to make a post')
 
-    
+@bp.route('/post/<post_id>')
+class Post(MethodView):
+
+    @jwt_required()
+    @bp.response(200, PostSchema)
+    def get(self, post_id):
+        P = PostModel.query.get(post_id)
+        if P:
+            return P
+        abort(400, message="Invalid Post Id")
+
+    @jwt_required()
+    def delete(self, post_id):
+        author_id = get_jwt_identity()
+        Post = PostModel.query.get(post_id)
+        if Post and author_id==Post("author_id"):
+            Post.delete()
+            return {'message':'Post Deleted'}
+        abort(400, message='You are not the author of this post, deletion failed')
